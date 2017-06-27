@@ -33,7 +33,7 @@ public class WacomBackup {
 	protected Node oY;
 
 	/**
-	 * Load a backup for the CTL-471 from a file.
+	 * Load a backup for the tablet from a file.
 	 * 
 	 * @param f
 	 *            The file the backup is in.

@@ -21,30 +21,85 @@ import org.xml.sax.SAXException;
  *
  */
 public class WacomBackupOSX extends WacomBackup {
+	
+	/**
+	 * Gets the file inside the backup folder that contains the actual backup data.
+	 * @param directory	The directory the backup is contained in.
+	 * @return	The pentablet backup file
+	 * @throws InvalidBackupException	Thrown if the folder doesn't contain a pentablet backup file.
+	 */
+	private static File getPenPrefsFile(File directory) throws InvalidBackupException
+	{
+		if (!directory.isDirectory())
+		{
+			throw new InvalidBackupException();
+		}
+		
+		File[] dirFiles = directory.listFiles();
+		for (File f : dirFiles)
+		{
+			if (f.getName().toLowerCase().contains("pentablet"))
+			{
+				return f;
+			}
+		}
+		throw new InvalidBackupException();
+	}
+	
+	/**
+	 * Gets the file inside the backup folder that contains the actual backup data.
+	 * @param directory	The directory the backup is contained in.
+	 * @return	The pentablet backup file
+	 * @throws InvalidBackupException	Thrown if the folder doesn't contain a pentablet backup file.
+	 */
+	private static File getTouchPrefsFile(File directory) throws InvalidBackupException
+	{
+		if (!directory.isDirectory())
+		{
+			throw new InvalidBackupException();
+		}
+		
+		File[] dirFiles = directory.listFiles();
+		for (File f : dirFiles)
+		{
+			if (f.getName().toLowerCase().contains("touch"))
+			{
+				return f;
+			}
+		}
+		throw new InvalidBackupException();
+	}
 
 	private Document touchPrefs;
 	private Document version;
+	
+	private String backupName;
+	private String touchName;
 
 	/**
-	 * Loads an OSX backup for the CTL-471.
+	 * Loads an OSX backup for the tablet.
 	 * 
 	 * @param bFile
 	 * @throws ParserConfigurationException
 	 * @throws SAXException
 	 * @throws IOException
 	 * @throws TransformerException
+	 * @throws InvalidBackupException 
 	 */
 	public WacomBackupOSX(File bFile)
-			throws ParserConfigurationException, SAXException, IOException, TransformerException {
+			throws ParserConfigurationException, SAXException, IOException, TransformerException, InvalidBackupException {
 		// The selected file is a folder that contains the actual backup, we
 		// pass the file containing the tablet area data to the parent class for
 		// processing.
-		super(new File(bFile, "com.wacom.pentablet.prefs"));
+		super(getPenPrefsFile(bFile)/*bFile, "com.wacom.pentablet.prefs")*/);
+		backupName = getPenPrefsFile(bFile).getName();
 
 		// The other files in the folder we simply store so we can create an edited backup later.
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-		touchPrefs = dBuilder.parse(new File(bFile, "com.wacom.touch.prefs"));
+		File touchPrefsFile = getTouchPrefsFile(bFile);
+		touchPrefs = dBuilder.parse(touchPrefsFile/*new File(bFile, "com.wacom.touch.prefs")*/);
+		touchName = touchPrefsFile.getName();
 		version = dBuilder.parse(new File(bFile, "version.plist"));
 	}
 
@@ -60,8 +115,8 @@ public class WacomBackupOSX extends WacomBackup {
 		try {
 			// write the content into xml file
 
-			File backupDataFile = new File(saveDir, "com.wacom.pentablet.prefs");
-			File touchFile = new File(saveDir, "com.wacom.touch.prefs");
+			File backupDataFile = new File(saveDir, backupName);
+			File touchFile = new File(saveDir, touchName);
 			File versionFile = new File(saveDir, "version.plist");
 
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();

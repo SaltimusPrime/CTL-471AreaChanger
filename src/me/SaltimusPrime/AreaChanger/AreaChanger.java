@@ -23,7 +23,7 @@ import javax.swing.JFileChooser;
 import java.awt.Toolkit;
 
 /**
- * Simple GUI for changing the active area of the CTL-471. Works on both Windows
+ * Simple GUI for changing the active area of a wacom tablet. Works on both Windows
  * and Mac OSX.
  * 
  * @author SaltimusPrime
@@ -56,6 +56,9 @@ public class AreaChanger extends JFrame {
 
 	// The wacom backup currently loaded.
 	private WacomBackup backup;
+	
+	// Store the file extension, this way we can allow users to try if the program works on different wacom tablets.
+	private String fileExt;
 
 	/**
 	 * Launch the application.
@@ -100,7 +103,7 @@ public class AreaChanger extends JFrame {
 	public AreaChanger() {
 		setIconImage(Toolkit.getDefaultToolkit()
 				.getImage(AreaChanger.class.getResource("/me/SaltimusPrime/AreaChanger/Images/icon.png")));
-		setTitle("CTL-471 Area Changer");
+		setTitle("Wacom CTL Area Changer");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 420, 300);
 		setResizable(false);
@@ -179,10 +182,10 @@ public class AreaChanger extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				final JFileChooser selector = new JFileChooser();
-				selector.setAcceptAllFileFilterUsed(false);
-				FileFilter filter = new FileNameExtensionFilter("CTL-471 Backup", "tabletprefs");
+				//selector.setAcceptAllFileFilterUsed(false);
+				FileFilter filter = new FileNameExtensionFilter("Wacom Backup", "tabletprefs", "wacomprefs");
 				selector.setFileFilter(filter);
-				selector.setDialogTitle("Select a CTL-471 tablet backup");
+				selector.setDialogTitle("Select a Wacom tablet backup");
 				int result = selector.showOpenDialog(null);
 				if (result == JFileChooser.APPROVE_OPTION) {
 					File f = selector.getSelectedFile();
@@ -191,6 +194,8 @@ public class AreaChanger extends JFrame {
 						// the OSX version extends the windows one, We don't
 						// need to make any further distinctions based on OS
 						// here.
+						fileExt = getFileExtension(f);
+						System.out.println(fileExt);
 						if (isMac) {
 							backup = new WacomBackupOSX(f);
 						} else {
@@ -272,7 +277,7 @@ public class AreaChanger extends JFrame {
 				File mbFile = null;
 				try {
 					url = new URL("file:" + ClassLoader.getSystemClassLoader().getResource(".").getPath()
-							+ "modBackup.tabletprefs");
+							+ "modBackup." + fileExt);
 					mbFile = new File(url.toURI().getSchemeSpecificPart());
 					
 					// Save the modified backup to modBackup.tabletprefs in the same folder the application was launched from.
@@ -299,5 +304,20 @@ public class AreaChanger extends JFrame {
 		};
 
 		return btAct;
+	}
+	
+	/**
+	 * Gets the extension of a file.
+	 * Since the backup folder on mac also has a . in it, it should also sorta work on the backups there.
+	 * @param file
+	 * @return
+	 */
+	private String getFileExtension(File file) {
+	    String name = file.getName();
+	    try {
+	        return name.substring(name.lastIndexOf(".") + 1);
+	    } catch (Exception e) {
+	        return "";
+	    }
 	}
 }
