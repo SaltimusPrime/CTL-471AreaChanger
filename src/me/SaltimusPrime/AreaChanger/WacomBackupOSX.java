@@ -40,7 +40,7 @@ public class WacomBackupOSX extends WacomBackup {
 		for (File f : dirFiles)
 		{
 			String filename = f.getName().toLowerCase();
-			if ((type.contains("pentablet") && f.contains("pentablet")) || (type.contains("touch") && f.contains("touch")))
+			if ((type.contains("pentablet") && filename.contains("pentablet")) || (type.contains("touch") && filename.contains("touch")))
 				return f;
 		}
 		throw new InvalidBackupException();
