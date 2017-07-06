@@ -21,14 +21,15 @@ import org.xml.sax.SAXException;
  *
  */
 public class WacomBackupOSX extends WacomBackup {
-	
 	/**
 	 * Gets the file inside the backup folder that contains the actual backup data.
 	 * @param directory	The directory the backup is contained in.
+	 * @param type	The backup type (pen or touch)
 	 * @return	The pentablet backup file
-	 * @throws InvalidBackupException	Thrown if the folder doesn't contain a pentablet backup file.
+	 * @throws InvalidBackupException	Thrown if the folder doesn't contain a pentablet or touch backup file.
 	 */
-	private static File getPenPrefsFile(File directory) throws InvalidBackupException
+	
+	private static File getPrefsFile(File directory, String type) throws InvalidBackupException
 	{
 		if (!directory.isDirectory())
 		{
@@ -38,34 +39,9 @@ public class WacomBackupOSX extends WacomBackup {
 		File[] dirFiles = directory.listFiles();
 		for (File f : dirFiles)
 		{
-			if (f.getName().toLowerCase().contains("pentablet"))
-			{
+			String filename = f.getName().toLowerCase();
+			if ((type.contains("pentablet") && f.contains("pentablet")) || (type.contains("touch") && f.contains("touch")))
 				return f;
-			}
-		}
-		throw new InvalidBackupException();
-	}
-	
-	/**
-	 * Gets the file inside the backup folder that contains the actual backup data.
-	 * @param directory	The directory the backup is contained in.
-	 * @return	The pentablet backup file
-	 * @throws InvalidBackupException	Thrown if the folder doesn't contain a pentablet backup file.
-	 */
-	private static File getTouchPrefsFile(File directory) throws InvalidBackupException
-	{
-		if (!directory.isDirectory())
-		{
-			throw new InvalidBackupException();
-		}
-		
-		File[] dirFiles = directory.listFiles();
-		for (File f : dirFiles)
-		{
-			if (f.getName().toLowerCase().contains("touch"))
-			{
-				return f;
-			}
 		}
 		throw new InvalidBackupException();
 	}
@@ -91,13 +67,14 @@ public class WacomBackupOSX extends WacomBackup {
 		// The selected file is a folder that contains the actual backup, we
 		// pass the file containing the tablet area data to the parent class for
 		// processing.
-		super(getPenPrefsFile(bFile)/*bFile, "com.wacom.pentablet.prefs")*/);
-		backupName = getPenPrefsFile(bFile).getName();
+		File pentabletPrefsFile = getPrefsFile(bfile, "pentablet");
+		super(pentabletPrefsFile));
+		backupName = pentabletPrefsFile.getName();
 
 		// The other files in the folder we simply store so we can create an edited backup later.
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-		File touchPrefsFile = getTouchPrefsFile(bFile);
+		File touchPrefsFile = getPrefsFile(bFile, "touch");
 		touchPrefs = dBuilder.parse(touchPrefsFile/*new File(bFile, "com.wacom.touch.prefs")*/);
 		touchName = touchPrefsFile.getName();
 		version = dBuilder.parse(new File(bFile, "version.plist"));
