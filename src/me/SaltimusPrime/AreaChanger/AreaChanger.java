@@ -44,6 +44,9 @@ public class AreaChanger extends JFrame {
 	private JTextField tfLeft;
 	private JTextField tfBottom;
 	private JTextField tfRight;
+	
+	private IntInputFilter filterMaxX;
+	private IntInputFilter filterMaxY;
 
 	private JLabel lblEnterCordinates;
 	private JLabel lblTop;
@@ -136,28 +139,30 @@ public class AreaChanger extends JFrame {
 		tfTop.setColumns(10);
 		tfTop.setBounds(96, 65, 86, 20);
 		tfTop.setEditable(false);
-		((PlainDocument) tfTop.getDocument()).setDocumentFilter(new IntInputFilter(9500));
+		filterMaxY = new IntInputFilter(0); // Set max value for filter to 0 for now since we don't know the tablet area yet.
+		((PlainDocument) tfTop.getDocument()).setDocumentFilter(filterMaxY);
 		contentPane.add(tfTop);
 
 		tfLeft = new JTextField();
 		tfLeft.setColumns(10);
 		tfLeft.setBounds(96, 126, 86, 20);
 		tfLeft.setEditable(false);
-		((PlainDocument) tfLeft.getDocument()).setDocumentFilter(new IntInputFilter(15200));
+		filterMaxX = new IntInputFilter(0); // Set max value for filter to 0 for now since we don't know the tablet area yet.
+		((PlainDocument) tfLeft.getDocument()).setDocumentFilter(filterMaxX);
 		contentPane.add(tfLeft);
 
 		tfBottom = new JTextField();
 		tfBottom.setEditable(false);
 		tfBottom.setColumns(10);
 		tfBottom.setBounds(277, 65, 86, 20);
-		((PlainDocument) tfBottom.getDocument()).setDocumentFilter(new IntInputFilter(9500));
+		((PlainDocument) tfBottom.getDocument()).setDocumentFilter(filterMaxY);
 		contentPane.add(tfBottom);
 
 		tfRight = new JTextField();
 		tfRight.setEditable(false);
 		tfRight.setColumns(10);
 		tfRight.setBounds(277, 126, 86, 20);
-		((PlainDocument) tfRight.getDocument()).setDocumentFilter(new IntInputFilter(15200));
+		((PlainDocument) tfRight.getDocument()).setDocumentFilter(filterMaxX);
 		contentPane.add(tfRight);
 
 		btnLoadBackup = new JButton("Load backup");
@@ -195,7 +200,6 @@ public class AreaChanger extends JFrame {
 						// need to make any further distinctions based on OS
 						// here.
 						fileExt = getFileExtension(f);
-						System.out.println(fileExt);
 						if (isMac) {
 							backup = new WacomBackupOSX(f);
 						} else {
@@ -205,6 +209,8 @@ public class AreaChanger extends JFrame {
 						// Read the active area values from the loaded backup
 						// and display them. From this point onward the user can
 						// edit the values.
+						filterMaxX.setMaxValue(backup.getMaxX());
+						filterMaxY.setMaxValue(backup.getMaxY());
 						tfTop.setText(Integer.toString(backup.getTopValue()));
 						tfTop.setEditable(true);
 						tfLeft.setText(Integer.toString(backup.getLeftValue()));
@@ -281,7 +287,12 @@ public class AreaChanger extends JFrame {
 					mbFile = new File(url.toURI().getSchemeSpecificPart());
 					
 					// Save the modified backup to modBackup.tabletprefs in the same folder the application was launched from.
-					backup.save(mbFile);
+					if (!backup.save(mbFile))
+					{
+						JOptionPane.showMessageDialog(null, "Could not save backup.", "Could not apply changes",
+								JOptionPane.ERROR_MESSAGE);
+						return;
+					}
 				} catch (Exception e1) {
 					JOptionPane.showMessageDialog(null, "Could not save backup.", "Could not apply changes",
 							JOptionPane.ERROR_MESSAGE);

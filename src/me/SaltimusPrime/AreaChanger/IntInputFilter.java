@@ -14,6 +14,9 @@ import javax.swing.text.DocumentFilter;
  */
 public class IntInputFilter extends DocumentFilter {
 
+	/**
+	 * Stores the highest value the user can input.
+	 */
 	private int maxValue;
 
 	/**

@@ -119,14 +119,12 @@ public class WacomBackupOSX extends WacomBackup {
 			File touchFile = new File(saveDir, touchName);
 			File versionFile = new File(saveDir, "version.plist");
 
+			super.save(backupDataFile);
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
-			DOMSource source = new DOMSource(backupXML);
-			StreamResult result = new StreamResult(backupDataFile);
-			transformer.transform(source, result);
 
-			source = new DOMSource(touchPrefs);
-			result = new StreamResult(touchFile);
+			DOMSource source = new DOMSource(touchPrefs);
+			StreamResult result = new StreamResult(touchFile);
 			transformer.transform(source, result);
 
 			source = new DOMSource(version);
