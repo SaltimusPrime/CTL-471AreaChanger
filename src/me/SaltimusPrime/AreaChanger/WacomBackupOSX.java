@@ -67,7 +67,6 @@ public class WacomBackupOSX extends WacomBackup {
 		// The selected file is a folder that contains the actual backup, we
 		// pass the file containing the tablet area data to the parent class for
 		// processing.
-		//File pentabletPrefsFile = 
 		super(getPrefsFile(bFile, "pentablet"));
 		backupName = getPrefsFile(bFile, "pentablet").getName();
 
