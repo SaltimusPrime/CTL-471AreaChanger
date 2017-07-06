@@ -67,9 +67,9 @@ public class WacomBackupOSX extends WacomBackup {
 		// The selected file is a folder that contains the actual backup, we
 		// pass the file containing the tablet area data to the parent class for
 		// processing.
-		File pentabletPrefsFile = getPrefsFile(bfile, "pentablet");
-		super(pentabletPrefsFile));
-		backupName = pentabletPrefsFile.getName();
+		//File pentabletPrefsFile = 
+		super(getPrefsFile(bFile, "pentablet"));
+		backupName = getPrefsFile(bFile, "pentablet").getName();
 
 		// The other files in the folder we simply store so we can create an edited backup later.
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
