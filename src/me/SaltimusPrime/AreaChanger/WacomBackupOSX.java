@@ -21,6 +21,14 @@ import org.xml.sax.SAXException;
  *
  */
 public class WacomBackupOSX extends WacomBackup {
+	
+	/**
+	 * Enum representing the different files used on OSX to store backupdata.
+	 */
+	private static enum BackupType {
+		TOUCH, PENTABLET
+	}
+	
 	/**
 	 * Gets the file inside the backup folder that contains the actual backup data.
 	 * @param directory	The directory the backup is contained in.
@@ -29,7 +37,7 @@ public class WacomBackupOSX extends WacomBackup {
 	 * @throws InvalidBackupException	Thrown if the folder doesn't contain a pentablet or touch backup file.
 	 */
 	
-	private static File getPrefsFile(File directory, String type) throws InvalidBackupException
+	private static File getPrefsFile(File directory, BackupType type) throws InvalidBackupException
 	{
 		if (!directory.isDirectory())
 		{
@@ -40,7 +48,7 @@ public class WacomBackupOSX extends WacomBackup {
 		for (File f : dirFiles)
 		{
 			String filename = f.getName().toLowerCase();
-			if ((type.contains("pentablet") && filename.contains("pentablet")) || (type.contains("touch") && filename.contains("touch")))
+			if ((type == BackupType.PENTABLET && filename.contains("pentablet")) || (type == BackupType.TOUCH && filename.contains("touch")))
 				return f;
 		}
 		throw new InvalidBackupException();
@@ -67,13 +75,13 @@ public class WacomBackupOSX extends WacomBackup {
 		// The selected file is a folder that contains the actual backup, we
 		// pass the file containing the tablet area data to the parent class for
 		// processing.
-		super(getPrefsFile(bFile, "pentablet"));
-		backupName = getPrefsFile(bFile, "pentablet").getName();
+		super(getPrefsFile(bFile, BackupType.PENTABLET));
+		backupName = getPrefsFile(bFile, BackupType.PENTABLET).getName();
 
 		// The other files in the folder we simply store so we can create an edited backup later.
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-		File touchPrefsFile = getPrefsFile(bFile, "touch");
+		File touchPrefsFile = getPrefsFile(bFile, BackupType.TOUCH);
 		touchPrefs = dBuilder.parse(touchPrefsFile/*new File(bFile, "com.wacom.touch.prefs")*/);
 		touchName = touchPrefsFile.getName();
 		version = dBuilder.parse(new File(bFile, "version.plist"));
